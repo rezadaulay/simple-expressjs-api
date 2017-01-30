@@ -20,9 +20,9 @@ router.get('/', function(req, res, next) {
     
     School.find({}).skip( (page-1) * limit ).limit(limit).sort(sorting).exec(function(err, schools){
         if (err)
-            res.send(err);
-        else
-            res.json(schools);
+            return res.send(err);
+        
+        res.json(schools);
     });
 });
 
@@ -31,9 +31,9 @@ router.get('/:id', function(req, res, next) {
     School.findById(id, function(err, school) {
     console.log(school.logo);
         if (err)
-            res.send(err);
-        else
-            res.json(school);
+            return res.send(err);
+
+        res.json(school);
     });
 });
 router.post('/', upload.single('logo'), function(req, res, next) {
@@ -48,16 +48,16 @@ router.post('/', upload.single('logo'), function(req, res, next) {
 
     school.save(function (err) {
         if (err)
-            res.send(err);
-        else
-            res.json(school);
+            return res.send(err);
+        
+        res.json(school);
     });
 });
 router.put('/:id', upload.single('logo'), function(req, res, next) {
     var id = req.params.id;
     School.findById(id, function(err, school) {
         if (err)
-            res.send(err);
+            return res.send(err);
 
         school.name = req.body.name;
         school.tagline = req.body.tagline;
@@ -75,7 +75,7 @@ router.put('/:id', upload.single('logo'), function(req, res, next) {
 
         school.save(function(err) {
             if (err)
-                res.send(err);
+                return res.send(err);
 
             res.json(school);
         });
@@ -84,10 +84,9 @@ router.put('/:id', upload.single('logo'), function(req, res, next) {
 router.delete('/:id', function(req, res, next) {
     var id = req.params.id;
     School.findOneAndRemove({ _id: id }, function (err, removed) {
-        if (err){
-            res.send(err)
-        }
-        else{
+        if (err)
+            return res.send(err)
+
             if( removed !== null && removed.logo !== undefined ){
                 fs.unlink('./app/dist/uploads/'+removed.logo, (err) => {
                     if (err){
@@ -97,7 +96,6 @@ router.delete('/:id', function(req, res, next) {
                 });
             }
             res.json(removed);
-        }
     });
 });
 
