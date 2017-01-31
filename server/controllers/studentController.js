@@ -5,6 +5,8 @@ const multer  = require('multer');
 
 const router = require("express").Router();
 
+//validator
+const studentValidator = require('../validators/student'); // get our config file
 
 router.get('/', function(req, res, next) {
 
@@ -24,33 +26,45 @@ router.get('/:id', function(req, res, next) {
     });
 });
 router.post('/', function(req, res, next) {
-    School.findById(req.body.school, function(err, school) {
-        if (err)
-            return res.send(err);
-        var student = new Student({
-            name: req.body.name,
-        });
-        student.school = school;
-        student.save(function(err) {
+    req.check(studentValidator.validationSchema);
+    req.getValidationResult().then(function(result) {
+        if (!result.isEmpty())
+          return res.status(400).send( result.array() );
+
+        School.findById(req.body.school, function(err, school) {
             if (err)
                 return res.send(err);
+            var student = new Student({
+                name: req.body.name,
+            });
+            student.school = school;
+            student.save(function(err) {
+                if (err)
+                    return res.send(err);
 
-            res.json(student);
+                res.json(student);
+            });
         });
     });
 });
 router.put('/:id', function(req, res, next) {
-    var id = req.params.id;
-    Student.findById(id, function(err, student) {
-        if (err)
-            return res.send(err);
+    const id = req.params.id;
+    req.check(studentValidator.validationSchema);
+    req.getValidationResult().then(function(result) {
+        if (!result.isEmpty())
+            return res.status(400).send( result.array() );
 
-        student.name = req.body.name;
-        student.save(function(err) {
+        Student.findById(id, function(err, student) {
             if (err)
                 return res.send(err);
 
-            res.json(student);
+            student.name = req.body.name;
+            student.save(function(err) {
+                if (err)
+                    return res.send(err);
+
+                res.json(student);
+            });
         });
     });
 });

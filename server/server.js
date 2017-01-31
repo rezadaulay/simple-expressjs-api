@@ -8,6 +8,7 @@ const mongoose = require("mongoose");
 mongoose.Promise = global.Promise;
 const path = require("path");
 const jwt    = require('jsonwebtoken');
+const expressValidator = require('express-validator');
 
 //controllers
 const schoolController = require("./controllers/schoolController");
@@ -22,7 +23,25 @@ app.use(express.static(path.join(__dirname, "../app/dist")));
 // use body parser so we can get info from POST and/or URL parameters
 app.use(bodyParser.json());
 //app.use(bodyParser.urlencoded({ extended: false }));
+app.use(expressValidator({
+	customValidators: {
+	    isPDF: function(value, filename) {
+			const extension = (path.extname(filename)).toLowerCase();
+			return extension === '.pdf';
+	    },isImage: function(value, filename) {
+	    	//console.log(value);
+	    	//console.log(path.extname(filename).toLowerCase());
+    		const imageExt = [".jpg", ".jpeg", ".png", ".gif"];
+      		var extension = path.extname(filename).toLowerCase();
+	      	return imageExt.indexOf(extension) !== -1;
+	    },maxSize: function(value, param, num) {
+	    	console.log(param);
+	    	console.log(num);
+	    	return param <= num;
+	    }
+  	},
 
+}));
 
 app.group("/setup", (router) => {
     router.use("/user", userController);

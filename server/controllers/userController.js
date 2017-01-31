@@ -14,8 +14,8 @@ router.get('/', function(req, res, next) {
 
 router.post('/', function(req, res, next) {
     var newUser = new User({
-        name: 'nick', 
-        password: 'password',
+        name: req.body.name, 
+        password: req.body.password,
     });
 
     User.createUser(newUser, function(err, user){
